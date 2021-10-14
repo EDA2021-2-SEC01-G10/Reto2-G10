@@ -43,15 +43,49 @@ def newCatalog():
     catalog={"artists":None,"artworks":None ,"medio/tecnica":None}
     catalog['artists'] = lt.newList('SINGLE_LINKED')
     catalog['artworks'] = lt.newList('SINGLE_LINKED')
-    catalog["medio/tecnica"] = mp.newMap(30, maptype='PROBING',loadfactor=0.5)
+    catalog["ConstituentID-Artists"] = mp.newMap(maptype='PROBING',loadfactor=0.50)
+    catalog["medio/tecnica"] = mp.newMap(maptype='PROBING',loadfactor=0.50)
+    catalog["Nacionalidad"]=mp.newMap(maptype='PROBING',loadfactor=0.50)
     return catalog
 
 # Funciones para agregar informacion al catalogo
 def addArtist(catalog, artist):              
     lt.addLast(catalog['artists'], artist)
+    mp.put(catalog["ConstituentID-Artists"],artist["ConstituentID"],[])
 def addArtwork(catalog, artwork):              
     lt.addLast(catalog['artworks'], artwork)
     mp.put(catalog["medio/tecnica"],artwork["Medium"],artwork) 
+   
+def addObrasPorId(catalog):  
+    obras=catalog["artworks"]
+    for obra in lt.iterator(obras):
+       idObra=obra["ConstituentID"]
+       idObra=idObra.replace("]","")
+       idObra=idObra.replace("[","")
+       idObra=idObra.split(",")
+       for id in idObra:
+           value=mp.get(catalog["ConstituentID-Artists"],id)
+           if value != None: 
+              valor=value["value"]
+              valor.append(obra)
+              mp.put(catalog["ConstituentID-Artists"],id,valor)
+
+def addNacionalidadesId(catalog):
+    artistas=catalog["artists"]
+    nacionalidades={}
+    for artista in lt.iterator(artistas):
+         nacionalidad=artista["Nationality"]
+         id=artista["ConstituentID"]
+         if nacionalidad not in nacionalidades: 
+            nacionalidades[nacionalidad]=id
+         else: 
+              valor=list(nacionalidades[nacionalidad])
+              valor.append(id)
+              nacionalidades[nacionalidad]=valor
+    keys_nacionalidades=nacionalidades.keys()
+    for nacionalidad in keys_nacionalidades: 
+        valor=nacionalidades[nacionalidad]
+        mp.put(catalog["Nacionalidad"],nacionalidad,valor) 
 
 # Funciones para creacion de datos
 
@@ -63,6 +97,20 @@ def medioEspecifico(obraPorMedios,medio):
         lt.addLast(listR,obra)
     listR=merge.sort(listR, cmpDate)   
     return listR 
+
+def obrasNacionalidad(catalog,nacionalidad):
+    listR=lt.newList('SINGLE_LINKED')
+    llaveValor=mp.get(catalog["Nacionalidad"],nacionalidad)
+    ids=llaveValor["value"]
+    for id in ids:
+        if id != "0":
+           llaveValorDos=mp.get(catalog["ConstituentID-Artists"],id)
+           if llaveValorDos != None:
+              obrasDeLaId=llaveValorDos["value"]
+              for obra in obrasDeLaId:
+                   lt.addLast(listR,obra)
+    return listR    
+
 # Funciones utilizadas para comparar elementos dentro de una lista
 
 def cmpDate(obra1,obra2): 

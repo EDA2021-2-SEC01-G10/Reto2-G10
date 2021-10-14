@@ -40,7 +40,9 @@ def initCatalog():
 def loadData(catalog):
     loadArtists(catalog)
     loadArtworks(catalog)
-    
+    loadArtworksID(catalog)
+    loadNacionalidades(catalog)
+
 def loadArtists(catalog):
     artistsfile = cf.data_dir + 'MoMA/Artists-utf8-large.csv'
     input_file = csv.DictReader(open(artistsfile, encoding='utf-8'))
@@ -53,10 +55,19 @@ def loadArtworks(catalog):
     for artwork in input_file:
         model.addArtwork(catalog, artwork)  
 
+def loadArtworksID(catalog):
+    model.addObrasPorId(catalog)
+
+def loadNacionalidades(catalog):
+    model.addNacionalidadesId(catalog)
+
 # Funciones de ordenamiento
 
 # Funciones de consulta sobre el catálogo
 def listMasAntiguas(catalog,medio): 
-    obraPorMedios=catalog["medio/tecnica"]
-    listR=model.medioEspecifico(obraPorMedios,medio)
+    obrasPorMedios=catalog["medio/tecnica"]
+    listR=model.medioEspecifico(obrasPorMedios,medio)
     return listR 
+def contarPorNacionalidad(catalog,nacionalidad): 
+    listR=model.obrasNacionalidad(catalog,nacionalidad)
+    return listR    
