@@ -117,6 +117,5 @@ def ordenarPorFecha(precios):
     return listOrdenada 
     
 
-
 def searchCID (list_art, idAw):
     return model.searchCID (list_art, idAw)
