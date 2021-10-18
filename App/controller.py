@@ -100,6 +100,7 @@ def getObrasArt(catalog, ids):
     return model.getObrasArt(catalog, ids)
 
 def firulais123(catalog):
+    
     return model.topNat(catalog)
 
 def preciosObras(listaDepartamento):

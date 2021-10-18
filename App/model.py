@@ -54,7 +54,7 @@ def newCatalog():
 # Funciones para agregar informacion al catalogo
 def addArtist(catalog, artist):              
     lt.addLast(catalog['artists'], artist)
-    mp.put(catalog["ConstituentID-Artists"],artist["ConstituentID"],[])
+    mp.put(catalog["ConstituentID-Artists"],artist["ConstituentID"],catalog["Nacionalidad"])
 def addArtwork(catalog, artwork):              
     lt.addLast(catalog['artworks'], artwork)
    
