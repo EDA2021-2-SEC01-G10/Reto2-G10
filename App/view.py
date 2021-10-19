@@ -39,9 +39,15 @@ operación solicitada
 def printMenu():
     print("Bienvenido")
     print("1- Cargar información en el catálogo")
-    print("2- Las obras más antiguas para un medio específico(Lab.5)")
-    print("3- Numero total de obras de una nacionalidad(Lab.6) ")
-    print("0- Salir ")
+    print("2- Listar cronológicamente los artistas(Req.1) ")
+    print("3- Listar cronológicamente las adquisiciones(Req.2)")
+    print("4- Clasificar las obras de un artista por técnica(Req.3)")
+    print("5- Clasificar las obras por la nacionalidad de sus creadores(Req.4)  ")
+    print("6- Transportar obras de un departamento (Req.5) ")
+    print("7- proponer una nueva exposición en el museo(Req.6)")
+    print("0- Salir")
+
+
 def initCatalog(): 
     catalog=controller.initCatalog()
     return catalog 
@@ -54,6 +60,16 @@ def listMasAntiguas(catalog,medio):
 def contarPorNacionalidad(catalog,nacionalidad):
     obrasPorNacionalidad=controller.contarPorNacionalidad(catalog,nacionalidad)
     return obrasPorNacionalidad
+def artEnRango(catalog,añoInicial,añoFinal):
+    lista=controller.artEnRango(catalog,añoInicial,añoFinal)
+    return lista    
+def listarAdquisisionesCronologicamente(catalog,fechaInicial,fechaFinal):
+    lista=controller.listarAdquisisiones(catalog,fechaInicial,fechaFinal)
+    return lista
+
+def obrasPorArtista(catalog,nombreArtista): 
+    lista=controller.obrasArtista(catalog,nombreArtista)
+    return lista 
 
 catalog = None
 
@@ -75,10 +91,91 @@ while True:
         print("Tiempo:",timeT)
 
     elif int(inputs[0]) == 2:
+        añoInicial=int(input("Ingrese el año de nacimiento para el rango inicial de artistas deseado:"))
+        añoFinal=int(input("Ingrese el año de nacimiento para el rango final de artistas deseado:"))
+        artistasEnRango=artEnRango(catalog,añoInicial,añoFinal)
+        print("") 
+        print("Hay " + str(lt.size(artistasEnRango)) +" artistas nacidos entre "+str(añoInicial)+" y "+str(añoFinal))
+        print("")
+        print("Los primeros y ultimos 3 artistas nacidos en este rango son: ")
+        print("")
+        artistsMostrar=(list(lt.iterator(artistasEnRango)))
+        if lt.size(artistasEnRango) >=3:
+            for i in range (0,3):       
+                print("|Nombre: "+artistsMostrar[i]["DisplayName"]+"|FechaDeNacimiento: "+artistsMostrar[i]["BeginDate"]+"|FechaDeFallecimiento: "+artistsMostrar[i]["EndDate"]+"|Nacionalidad: "+artistsMostrar[i]["Nationality"]+"|Genero: "+artistsMostrar[i]["Gender"])
+                print("")
+                
+            for i in range (lt.size(artistasEnRango)-3,lt.size(artistasEnRango)):
+                print("|Nombre: "+artistsMostrar[i]["DisplayName"]+"|FechaDeNacimiento: "+artistsMostrar[i]["BeginDate"]+"|FechaDeFallecimiento: "+artistsMostrar[i]["EndDate"]+"|Nacionalidad: "+artistsMostrar[i]["Nationality"]+"|Genero: "+artistsMostrar[i]["Gender"])
+                print("")    
+        else: 
+             for i in lt.iterator(artistasEnRango):
+                 print("|Nombre: "+i["DisplayName"]+"|FechaDeNacimiento: "+i["BeginDate"]+"|FechaDeFallecimiento: "+i["EndDate"]+"|Nacionalidad: "+i["Nationality"]+"|Genero: "+i["Gender"]) 
+        
+    elif int(inputs[0]) == 3:
+        start_time = time.process_time()
+        fechaInicial=input("Ingrese la fecha que desee consultar como rango inicial de las adquisisiones: ")
+        fechaFinal=input("Ingrese la fecha que desee consultar como rango final de las adquisisiones: ")
+        listAdquisisiones=listarAdquisisionesCronologicamente(catalog,fechaInicial,fechaFinal)
+        print("") 
+        print("El MoMA adquirio "+str(lt.size(listAdquisisiones))+" piezas unicas entre "+fechaInicial+" y "+fechaFinal) 
+        compradas=0          
+        for i in lt.iterator(listAdquisisiones):
+            creditLine=i["CreditLine"]
+            if creditLine == "Purchase":
+               compradas+=1
+        print("")     
+        print("Con un total de "+str(compradas)+" obras compradas.")  
+        print("")
+        print("Las primeras y ultimas 3 obras en este rango son: ")
+        print("")
+        artworksMostrar=(list(lt.iterator(listAdquisisiones)))
+        for i in range (0,3):
+             print("|Titulo: "+artworksMostrar[i]["Title"]+"|Artista(s): "+artworksMostrar[i]["ConstituentID"]+"|Fecha: "+artworksMostrar[i]["Date"]+"|Medio: "+artworksMostrar[i]["Medium"]+"|Dimensiones: "+artworksMostrar[i]["Dimensions"])
+             print("")
+        for i in range (lt.size(listAdquisisiones)-3,lt.size(listAdquisisiones)):
+             print("|Titulo: "+artworksMostrar[i]["Title"]+"|Artista(s): "+artworksMostrar[i]["ConstituentID"]+"|Fecha: "+artworksMostrar[i]["Date"]+"|Medio: "+artworksMostrar[i]["Medium"]+"|Dimensiones: "+artworksMostrar[i]["Dimensions"])
+             print("")
+    elif int(inputs[0]) == 4:
+         nombreArtista=input("Ingrese el nombre del artista que desea consultar: ") 
+         listObrasPorArtista=obrasPorArtista(catalog,nombreArtista)
+         obras=listObrasPorArtista[0]
+         id=listObrasPorArtista[1]
+         print("")
+         print (nombreArtista+" con MoMA ID "+id+" tiene "+str(lt.size(obras))+" piezas con su nombre en el museo.")
+         tecniques={}
+         for i in lt.iterator(obras):
+             tecnique=i["Medium"]
+             if tecnique not in tecniques: 
+                 tecniques[tecnique]=1
+             else:
+                  tecniques[tecnique]+=1
+         print("")
+         print("Hay "+str(len(tecniques))+" diferentes tecnicas/medios en sus trabajos.")
+         tecniquesValues=list(tecniques.values())
+         tecniquesKeys=list(tecniques.keys())
+         maxTecnique=max(tecniquesValues)
+         maxTecniqueName=""
+         for i in tecniquesKeys: 
+             num=tecniques[i]
+             if num == maxTecnique :
+                maxTecniqueName=i 
+                print("")
+                print("La tecnica más usada por el/la artista es "+ i +",con la cual tiene los siguientes ejemplares:")
+                print("")
+                break
+         for obra in lt.iterator(obras):   
+             tecnique=obra["Medium"]
+             if tecnique == maxTecniqueName: 
+                print("|Titulo: "+obra["Title"]+"|Fecha: "+obra["Date"]+"|Medio: "+obra["Medium"]+"|Dimensiones: "+obra["Dimensions"])
+                print("")
+
+
+    elif int(inputs[0]) == 211:
         medio=input("Ingrese el medio especifico que desea consultar: ")
         masAntiguas=listMasAntiguas(catalog,medio)
         print(lt.size(masAntiguas))
-    elif int(inputs[0]) == 3:    
+    elif int(inputs[0]) == 311:    
         nacionalidad=(input("Ingrese la nacionalidad que desea consultar: ")).strip()
         obrasPorNacionalidad=contarPorNacionalidad(catalog,nacionalidad)
         numeroObras=str(lt.size(obrasPorNacionalidad))
