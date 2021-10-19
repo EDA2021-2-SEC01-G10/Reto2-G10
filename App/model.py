@@ -24,7 +24,8 @@
  * Dario Correal - Version inicial
  """
 
-
+from datetime import datetime 
+import time
 import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
@@ -40,12 +41,14 @@ los mismos.
 
 # Construccion de modelos
 def newCatalog():
-    catalog={"artists":None,"artworks":None ,"medio/tecnica":None}
+    catalog={"artists":None,"artworks":None}
     catalog['artists'] = lt.newList('SINGLE_LINKED')
     catalog['artworks'] = lt.newList('SINGLE_LINKED')
     catalog["ConstituentID-Artists"] = mp.newMap(maptype='PROBING',loadfactor=0.50)
     catalog["medio/tecnica"] = mp.newMap(maptype='PROBING',loadfactor=0.50)
     catalog["Nacionalidad"]=mp.newMap(maptype='PROBING',loadfactor=0.50)
+    catalog["BeginDate"]=mp.newMap(numelements=1000,maptype='PROBING',loadfactor=0.50)
+    catalog["DateAcquired"]=mp.newMap(maptype='PROBING',loadfactor=0.50)
     return catalog
 
 # Funciones para agregar informacion al catalogo
@@ -87,7 +90,69 @@ def addNacionalidadesId(catalog):
         valor=nacionalidades[nacionalidad]
         mp.put(catalog["Nacionalidad"],nacionalidad,valor) 
 
-# Funciones para creacion de datos
+def addBeginDate(catalog):       
+    artistas=catalog["artists"]
+    fechas={}
+    for artista in lt.iterator(artistas):
+        beginDate=artista["BeginDate"]
+        listaApp=[]
+        dictArt={}
+        dictArt["DisplayName"]=artista["DisplayName"]
+        dictArt["BeginDate"]=beginDate
+        fallecimiento=artista["EndDate"]
+        if fallecimiento != "" and fallecimiento != "0" :
+            dictArt["EndDate"]=fallecimiento
+        else: 
+            dictArt["EndDate"]="Unknown"    
+        nacionalidad=artista["Nationality"]   
+        if nacionalidad != "": 
+            dictArt["Nationality"]=nacionalidad
+        else: 
+             dictArt["Nationality"]="Unknown"     
+        genero=artista["Gender"]
+        if genero != "": 
+           dictArt["Gender"]=genero
+        else: 
+             dictArt["Gender"]="Unknown"   
+        listaApp.append(dictArt)
+        if beginDate not in fechas: 
+           fechas[beginDate]=listaApp
+        else: 
+             valor=fechas[beginDate]
+             valor.append(dictArt)
+             fechas[beginDate]=valor            
+    keysFechas=fechas.keys()
+    keysFechasOr=sorted(keysFechas)
+    for fecha in keysFechasOr:
+        artistas=fechas[fecha]
+        mp.put(catalog["BeginDate"],fecha,artistas)    
+
+def addDateAcquired(catalog):
+    obras=catalog["artworks"]
+    fechas={}
+    for obra in lt.iterator(obras):
+        dateAcquired=obra["DateAcquired"]
+        listaApp=[]
+        dictArt={}
+        dictArt["Title"]=obra["Title"]
+        dictArt["ConstituentID"]=obra["ConstituentID"]
+        dictArt["Date"]=obra["Date"]
+        dictArt["Medium"]=obra["Medium"]
+        dictArt["Dimensions"]=obra["Dimensions"]
+        dictArt["CreditLine"]=obra["CreditLine"]
+        listaApp.append(dictArt)
+        if dateAcquired not in fechas: 
+           fechas[dateAcquired]=listaApp
+        else: 
+             valor=fechas[dateAcquired]
+             valor.append(dictArt)
+             fechas[dateAcquired]=valor
+    keysFechas=fechas.keys()
+    keysFechasOr=sorted(keysFechas)
+    for fecha in keysFechasOr:
+        obras=fechas[fecha]
+        mp.put(catalog["DateAcquired"],fecha,obras)             
+
 
 # Funciones de consulta
 def medioEspecifico(obraPorMedios,medio): 
@@ -111,9 +176,61 @@ def obrasNacionalidad(catalog,nacionalidad):
                    lt.addLast(listR,obra)
     return listR    
 
+def artEnRango(catalog,añoInicial,añoFinal):   
+    listR=lt.newList('SINGLE_LINKED')
+    fechas=catalog["BeginDate"]
+    fechasKeysSet=mp.keySet(fechas)
+    fechasKeys=[]
+    for fch in lt.iterator(fechasKeysSet):
+        fechasKeys.append(fch)
+    fechasKeys.sort()    
+    for fecha in fechasKeys: 
+        if int(fecha) >= añoInicial and int(fecha) <= añoFinal :
+           artistas=mp.get(fechas,fecha)["value"]
+           for artist in artistas:
+               lt.addLast(listR,artist) 
+        elif int(fecha) > añoFinal: 
+             break 
+    return listR    
+
+def listarAdquisisiones(catalog,fechaInicial,fechaFinal): 
+    listR=lt.newList('SINGLE_LINKED')
+    fechas=catalog["DateAcquired"]
+    fechasKeysSet=mp.keySet(fechas)
+    fechasKeys=[]
+    for fch in lt.iterator(fechasKeysSet):
+        fechasKeys.append(fch)
+    fechasKeys.sort()    
+    fechaInDate = datetime.strptime(fechaInicial.strip(), "%Y-%m-%d")
+    fechaFinDate= datetime.strptime(fechaFinal.strip(), "%Y-%m-%d")
+    for fecha in fechasKeys: 
+        if fecha != "":
+           fechaCom=datetime.strptime(fecha.strip(), "%Y-%m-%d")
+           if fechaCom >= fechaInDate and fechaCom <= fechaFinDate: 
+               obras=mp.get(fechas,fecha)["value"]
+               for obra in obras: 
+                   lt.addLast(listR,obra)
+           elif fechaCom > fechaFinDate:
+                break 
+    return listR      
+              
+def obrasArtista(catalog,nombreArtista): 
+    obras=lt.newList('SINGLE_LINKED')
+    artistas=catalog["artists"]
+    id=""
+    for artist in lt.iterator(artistas):
+        nombre=artist["DisplayName"]
+        if nombre.strip() == nombreArtista.strip(): 
+           id=artist["ConstituentID"]       
+    obrasPorID=catalog["ConstituentID-Artists"]
+    obrasDelArtista=mp.get(obrasPorID,id)["value"]
+    for obra in obrasDelArtista:
+        lt.addLast(obras,obra)
+    return (obras,id)
+
 # Funciones utilizadas para comparar elementos dentro de una lista
 
 def cmpDate(obra1,obra2): 
     return ((str(obra1['Date']) < str(obra2['Date'])))
 
-# Funciones de ordenamiento
+
