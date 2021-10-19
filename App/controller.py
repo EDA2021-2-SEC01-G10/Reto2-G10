@@ -42,15 +42,17 @@ def loadData(catalog):
     loadArtworks(catalog)
     loadArtworksID(catalog)
     loadNacionalidades(catalog)
+    loadBeginDates(catalog)
+    loadDateAcquired(catalog)
 
 def loadArtists(catalog):
-    artistsfile = cf.data_dir + 'MoMA/Artists-utf8-large.csv'
+    artistsfile = cf.data_dir + 'MoMA/Artists-utf8-small.csv'
     input_file = csv.DictReader(open(artistsfile, encoding='utf-8'))
     for artist in input_file:
         model.addArtist(catalog, artist) 
 
 def loadArtworks(catalog):
-    artworksfile = cf.data_dir + 'MoMA/Artworks-utf8-large.csv'
+    artworksfile = cf.data_dir + 'MoMA/Artworks-utf8-small.csv'
     input_file = csv.DictReader(open(artworksfile, encoding='utf-8'))
     for artwork in input_file:
         model.addArtwork(catalog, artwork)  
@@ -60,10 +62,24 @@ def loadArtworksID(catalog):
 
 def loadNacionalidades(catalog):
     model.addNacionalidadesId(catalog)
+def loadBeginDates(catalog):
+    model.addBeginDate(catalog)    
+def loadDateAcquired(catalog):
+    model.addDateAcquired(catalog) 
 
 # Funciones de ordenamiento
 
 # Funciones de consulta sobre el catálogo
+def artEnRango(catalog,añoInicial,añoFinal):
+    lista=model.artEnRango(catalog,añoInicial,añoFinal)
+    return lista
+def listarAdquisisiones(catalog,fechaInicial,fechaFinal):
+    listR=model.listarAdquisisiones(catalog,fechaInicial,fechaFinal)    
+    return listR
+def obrasArtista(catalog,nombreArtista): 
+    listR=model.obrasArtista(catalog,nombreArtista)
+    return listR 
+    
 def listMasAntiguas(catalog,medio): 
     obrasPorMedios=catalog["medio/tecnica"]
     listR=model.medioEspecifico(obrasPorMedios,medio)
