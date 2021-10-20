@@ -20,7 +20,6 @@
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
 import time
-from DISClib.DataStructures.arraylist import getElement 
 import config as cf
 import sys
 import controller
