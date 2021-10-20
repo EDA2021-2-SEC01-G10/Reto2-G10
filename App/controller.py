@@ -41,9 +41,9 @@ def loadData(catalog):
     loadArtists(catalog)
     loadArtworks(catalog)
     loadArtworksID(catalog)
-    loadNacionalidades(catalog)
     loadBeginDates(catalog)
     loadDateAcquired(catalog)
+    loadDepartaments(catalog)
 
 def loadArtists(catalog):
     artistsfile = cf.data_dir + 'MoMA/Artists-utf8-small.csv'
@@ -60,14 +60,14 @@ def loadArtworks(catalog):
 def loadArtworksID(catalog):
     model.addObrasPorId(catalog)
 
-def loadNacionalidades(catalog):
-    model.addNacionalidadesId(catalog)
 def loadBeginDates(catalog):
     model.addBeginDate(catalog)    
 def loadDateAcquired(catalog):
     model.addDateAcquired(catalog) 
+def loadDepartaments(catalog):
+    model.addDepartaments(catalog)
 
-# Funciones de ordenamiento
+
 
 # Funciones de consulta sobre el catálogo
 def artEnRango(catalog,añoInicial,añoFinal):
@@ -79,11 +79,26 @@ def listarAdquisisiones(catalog,fechaInicial,fechaFinal):
 def obrasArtista(catalog,nombreArtista): 
     listR=model.obrasArtista(catalog,nombreArtista)
     return listR 
+       
+def lstDepartamento(catalog,departamento):
+    listaDepartamento=obtenerLista(catalog,departamento)
+    agregarPrecio=preciosObras(listaDepartamento)
+    return agregarPrecio
+
+def obtenerLista(catalog,departamento):
+    listR=model.listaDepartamento(catalog,departamento)
+    return listR
+
+def preciosObras(listaDepartamento):
+    listConPrecios=model.addPrecios(listaDepartamento)  
+    return listConPrecios
+
+# Funciones de ordenamiento 
+def ordenarPorCosto(precios):
+    listOrdenada=model.ordenarPorCosto(precios)   
+    return listOrdenada
+
+def ordenarPorFecha(precios):
+    listOrdenada=model.ordenarPorFecha(precios)
+    return listOrdenada 
     
-def listMasAntiguas(catalog,medio): 
-    obrasPorMedios=catalog["medio/tecnica"]
-    listR=model.medioEspecifico(obrasPorMedios,medio)
-    return listR 
-def contarPorNacionalidad(catalog,nacionalidad): 
-    listR=model.obrasNacionalidad(catalog,nacionalidad)
-    return listR    

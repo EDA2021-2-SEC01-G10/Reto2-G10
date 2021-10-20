@@ -44,7 +44,7 @@ def printMenu():
     print("4- Clasificar las obras de un artista por técnica(Req.3)")
     print("5- Clasificar las obras por la nacionalidad de sus creadores(Req.4)  ")
     print("6- Transportar obras de un departamento (Req.5) ")
-    print("7- proponer una nueva exposición en el museo(Req.6)")
+    print("7- (Req.6)")
     print("0- Salir")
 
 
@@ -54,12 +54,6 @@ def initCatalog():
 def loadData(catalog): 
     controller.loadData(catalog)
 
-def listMasAntiguas(catalog,medio): 
-    list=controller.listMasAntiguas(catalog,medio) 
-    return list     
-def contarPorNacionalidad(catalog,nacionalidad):
-    obrasPorNacionalidad=controller.contarPorNacionalidad(catalog,nacionalidad)
-    return obrasPorNacionalidad
 def artEnRango(catalog,añoInicial,añoFinal):
     lista=controller.artEnRango(catalog,añoInicial,añoFinal)
     return lista    
@@ -70,6 +64,16 @@ def listarAdquisisionesCronologicamente(catalog,fechaInicial,fechaFinal):
 def obrasPorArtista(catalog,nombreArtista): 
     lista=controller.obrasArtista(catalog,nombreArtista)
     return lista 
+def lstDepartamento(catalog,departamento):
+    listDepartamento=controller.lstDepartamento(catalog,departamento)
+    return listDepartamento
+def ordenarPorCosto(precios): 
+    listOrdenada=controller.ordenarPorCosto(precios)
+    return listOrdenada
+def ordenarPorFecha(precios): 
+    listOrdenada=controller.ordenarPorFecha(precios)
+    return listOrdenada
+
 
 catalog = None
 
@@ -89,7 +93,8 @@ while True:
         stop_time = time.process_time()
         timeT=(stop_time - start_time)*1000
         print("Tiempo:",timeT)
-
+    
+        
     elif int(inputs[0]) == 2:
         añoInicial=int(input("Ingrese el año de nacimiento para el rango inicial de artistas deseado:"))
         añoFinal=int(input("Ingrese el año de nacimiento para el rango final de artistas deseado:"))
@@ -170,16 +175,59 @@ while True:
                 print("|Titulo: "+obra["Title"]+"|Fecha: "+obra["Date"]+"|Medio: "+obra["Medium"]+"|Dimensiones: "+obra["Dimensions"])
                 print("")
 
-
-    elif int(inputs[0]) == 211:
-        medio=input("Ingrese el medio especifico que desea consultar: ")
-        masAntiguas=listMasAntiguas(catalog,medio)
-        print(lt.size(masAntiguas))
-    elif int(inputs[0]) == 311:    
-        nacionalidad=(input("Ingrese la nacionalidad que desea consultar: ")).strip()
-        obrasPorNacionalidad=contarPorNacionalidad(catalog,nacionalidad)
-        numeroObras=str(lt.size(obrasPorNacionalidad))
-        print("Hay "+numeroObras+" obras catalogadas,hechas por artistas con nacionalidad de: "+nacionalidad)
+    elif int(inputs[0]) == 6:     
+         departamento=input("Ingrese el nombre del departamento que quiere consultar: ")
+         departamento=departamento.strip()
+         listDepartamento=lstDepartamento(catalog,departamento)
+         print("")
+         print("El MoMA va a transportar "+str(lt.size(listDepartamento))+" obras del departamento de "+departamento)
+         pesoTotalEstimado=0.0 
+         for i in lt.iterator(listDepartamento):
+             pesoPorObra=i["Weight (kg)"]
+             if pesoPorObra != "": 
+                pesoPorObra=float(pesoPorObra) 
+                pesoTotalEstimado += pesoPorObra 
+         print("")       
+         print("El peso estimado de la carga en Kg es :" + str(pesoTotalEstimado))
+         precioTotalEstimado=0.0
+         for j in lt.iterator(listDepartamento):
+             precio=j["CostoObra"]
+             precioTotalEstimado+=precio
+         print("")       
+         print("El costo estimado de la carga en USD es :" + str(round(precioTotalEstimado,3)))
+         preciosOrdenadosFecha=ordenarPorFecha(listDepartamento)
+         preciosOrdenadosCosto=ordenarPorCosto(listDepartamento)
+         print("")       
+         print("Las 5 obras más antiguas para transportar son:")
+         print("")   
+         obrasMostrar=list(lt.iterator(preciosOrdenadosFecha))
+         mostradas=0
+         i=0
+         while i < len(obrasMostrar) and mostradas <5 :
+              fecha= obrasMostrar[i]["Date"]
+              if fecha != "":
+                 print("|Titulo: "+obrasMostrar[i]["Title"]+"|Artista(s): "+obrasMostrar[i]["ConstituentID"]+"|Clasificación: "+obrasMostrar[i]["Classification"]+"|Fecha: "+obrasMostrar[i]["Date"]+"|Medio: "+obrasMostrar[i]["Medium"]+"|Dimensiones: "+obrasMostrar[i]["Dimensions"]+"|Costo(USD): "+str(round(obrasMostrar[i]["CostoObra"],3)))
+                 print("")
+                 mostradas+=1
+                 i+=1
+              else:
+                   i+=1   
+         print("")       
+         print("Las 5 obras más costosas para transportar son:")
+         print("")   
+         obrasMostrar=list(lt.iterator(preciosOrdenadosCosto))
+         mostradas=0
+         i=len(obrasMostrar)-1
+         while i > 0 and mostradas <5 :
+              costo= obrasMostrar[i]["CostoObra"]
+              if costo != "":
+                 print("|Titulo: "+obrasMostrar[i]["Title"]+"|Artista(s): "+obrasMostrar[i]["ConstituentID"]+"|Clasificación: "+obrasMostrar[i]["Classification"]+"|Fecha: "+obrasMostrar[i]["Date"]+"|Medio: "+obrasMostrar[i]["Medium"]+"|Dimensiones: "+obrasMostrar[i]["Dimensions"]+"|Costo(USD): "+str(round(obrasMostrar[i]["CostoObra"],3)))
+                 print("")
+                 mostradas+=1
+                 i-=1
+              else:
+                   i-=1   
+ 
     elif int(inputs[0]) == 0:    
          sys.exit(0)
     else:
