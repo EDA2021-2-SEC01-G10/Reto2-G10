@@ -96,6 +96,7 @@ while True:
     
         
     elif int(inputs[0]) == 2:
+        start_time = time.process_time()
         añoInicial=int(input("Ingrese el año de nacimiento para el rango inicial de artistas deseado:"))
         añoFinal=int(input("Ingrese el año de nacimiento para el rango final de artistas deseado:"))
         artistasEnRango=artEnRango(catalog,añoInicial,añoFinal)
@@ -116,7 +117,10 @@ while True:
         else: 
              for i in lt.iterator(artistasEnRango):
                  print("|Nombre: "+i["DisplayName"]+"|FechaDeNacimiento: "+i["BeginDate"]+"|FechaDeFallecimiento: "+i["EndDate"]+"|Nacionalidad: "+i["Nationality"]+"|Genero: "+i["Gender"]) 
-        
+        stop_time = time.process_time()
+        timeT=(stop_time - start_time)*1000
+        print("Tiempo:",timeT)
+
     elif int(inputs[0]) == 3:
         start_time = time.process_time()
         fechaInicial=input("Ingrese la fecha que desee consultar como rango inicial de las adquisisiones: ")
@@ -141,7 +145,11 @@ while True:
         for i in range (lt.size(listAdquisisiones)-3,lt.size(listAdquisisiones)):
              print("|Titulo: "+artworksMostrar[i]["Title"]+"|Artista(s): "+artworksMostrar[i]["ConstituentID"]+"|Fecha: "+artworksMostrar[i]["Date"]+"|Medio: "+artworksMostrar[i]["Medium"]+"|Dimensiones: "+artworksMostrar[i]["Dimensions"])
              print("")
+        stop_time = time.process_time()
+        timeT=(stop_time - start_time)*1000
+        print("Tiempo:",timeT)     
     elif int(inputs[0]) == 4:
+         start_time = time.process_time()
          nombreArtista=input("Ingrese el nombre del artista que desea consultar: ") 
          listObrasPorArtista=obrasPorArtista(catalog,nombreArtista)
          obras=listObrasPorArtista[0]
@@ -174,8 +182,12 @@ while True:
              if tecnique == maxTecniqueName: 
                 print("|Titulo: "+obra["Title"]+"|Fecha: "+obra["Date"]+"|Medio: "+obra["Medium"]+"|Dimensiones: "+obra["Dimensions"])
                 print("")
+         stop_time = time.process_time()
+         timeT=(stop_time - start_time)*1000
+         print("Tiempo:",timeT) 
 
     elif int(inputs[0]) == 6:     
+         start_time = time.process_time()
          departamento=input("Ingrese el nombre del departamento que quiere consultar: ")
          departamento=departamento.strip()
          listDepartamento=lstDepartamento(catalog,departamento)
@@ -227,7 +239,9 @@ while True:
                  i-=1
               else:
                    i-=1   
- 
+         stop_time = time.process_time()
+         timeT=(stop_time - start_time)*1000
+         print("Tiempo:",timeT)
     elif int(inputs[0]) == 0:    
          sys.exit(0)
     else:
