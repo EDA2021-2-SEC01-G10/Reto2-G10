@@ -45,10 +45,10 @@ def newCatalog():
     catalog['artists'] = lt.newList('SINGLE_LINKED')
     catalog['artworks'] = lt.newList('SINGLE_LINKED')
     catalog["ConstituentID-Artists"] = mp.newMap(maptype='PROBING',loadfactor=0.50)
-    catalog["medio/tecnica"] = mp.newMap(maptype='PROBING',loadfactor=0.50)
     catalog["Nacionalidad"]=mp.newMap(maptype='PROBING',loadfactor=0.50)
     catalog["BeginDate"]=mp.newMap(numelements=1000,maptype='PROBING',loadfactor=0.50)
     catalog["DateAcquired"]=mp.newMap(maptype='PROBING',loadfactor=0.50)
+    catalog["Departament"]=mp.newMap(maptype='PROBING',loadfactor=0.50)
     return catalog
 
 # Funciones para agregar informacion al catalogo
@@ -57,7 +57,7 @@ def addArtist(catalog, artist):
     mp.put(catalog["ConstituentID-Artists"],artist["ConstituentID"],[])
 def addArtwork(catalog, artwork):              
     lt.addLast(catalog['artworks'], artwork)
-    mp.put(catalog["medio/tecnica"],artwork["Medium"],artwork) 
+   
    
 def addObrasPorId(catalog):  
     obras=catalog["artworks"]
@@ -73,22 +73,6 @@ def addObrasPorId(catalog):
               valor.append(obra)
               mp.put(catalog["ConstituentID-Artists"],id,valor)
 
-def addNacionalidadesId(catalog):
-    artistas=catalog["artists"]
-    nacionalidades={}
-    for artista in lt.iterator(artistas):
-         nacionalidad=artista["Nationality"]
-         id=artista["ConstituentID"]
-         if nacionalidad not in nacionalidades: 
-            nacionalidades[nacionalidad]=id
-         else: 
-              valor=list(nacionalidades[nacionalidad])
-              valor.append(id)
-              nacionalidades[nacionalidad]=valor
-    keys_nacionalidades=nacionalidades.keys()
-    for nacionalidad in keys_nacionalidades: 
-        valor=nacionalidades[nacionalidad]
-        mp.put(catalog["Nacionalidad"],nacionalidad,valor) 
 
 def addBeginDate(catalog):       
     artistas=catalog["artists"]
@@ -153,29 +137,38 @@ def addDateAcquired(catalog):
         obras=fechas[fecha]
         mp.put(catalog["DateAcquired"],fecha,obras)             
 
+def addDepartaments(catalog):
+    obras=catalog["artworks"]
+    departamentos={}
+    for obra in lt.iterator(obras):
+        departamento=obra["Department"]
+        listaObras=[]
+        dictObra={}
+        dictObra["Department"]=obra["Department"]
+        dictObra["Title"]=obra["Title"]
+        dictObra["ConstituentID"]=obra["ConstituentID"]
+        dictObra["Date"]=obra["Date"]
+        dictObra["Medium"]=obra["Medium"]
+        dictObra["Dimensions"]=obra["Dimensions"]
+        dictObra["Height (cm)"] =obra["Height (cm)"] 
+        dictObra["Width (cm)"]=obra["Width (cm)"]
+        dictObra["Weight (kg)"] =obra["Weight (kg)"] 
+        dictObra["Depth (cm)"]=obra["Depth (cm)"]
+        dictObra["Classification"]=obra["Classification"]    
+        listaObras.append(dictObra)
+        if departamento not in departamentos: 
+            departamentos[departamento]=listaObras
+        else: 
+             valor=departamentos[departamento]
+             valor.append(dictObra)
+             departamentos[departamento]=valor    
+    keysDepartamentos=departamentos.keys()
+    for departamento in departamentos: 
+        obras=departamentos[departamento]
+        mp.put(catalog["Departament"],departamento,obras)
+
 
 # Funciones de consulta
-def medioEspecifico(obraPorMedios,medio): 
-    obrasEnMedio=mp.get(obraPorMedios,medio)
-    listR=lt.newList('SINGLE_LINKED')
-    for obra in lt.iterator(obrasEnMedio):
-        lt.addLast(listR,obra)
-    listR=merge.sort(listR, cmpDate)   
-    return listR 
-
-def obrasNacionalidad(catalog,nacionalidad):
-    listR=lt.newList('SINGLE_LINKED')
-    llaveValor=mp.get(catalog["Nacionalidad"],nacionalidad)
-    ids=llaveValor["value"]
-    for id in ids:
-        if id != "0":
-           llaveValorDos=mp.get(catalog["ConstituentID-Artists"],id)
-           if llaveValorDos != None:
-              obrasDeLaId=llaveValorDos["value"]
-              for obra in obrasDeLaId:
-                   lt.addLast(listR,obra)
-    return listR    
-
 def artEnRango(catalog,añoInicial,añoFinal):   
     listR=lt.newList('SINGLE_LINKED')
     fechas=catalog["BeginDate"]
@@ -228,9 +221,87 @@ def obrasArtista(catalog,nombreArtista):
         lt.addLast(obras,obra)
     return (obras,id)
 
+def listaDepartamento(catalog,departamento):
+    obrasPorDepartamento=lt.newList('SINGLE_LINKED')
+    departamentos=catalog["Departament"] 
+    depKeysSet=mp.keySet(departamentos)
+    depKeys=[]
+    for departament in lt.iterator(depKeysSet):
+        depKeys.append(departament)
+    for depar in depKeys:
+        if depar == departamento :
+           obras=mp.get(departamentos,depar)["value"]
+           for obra in obras: 
+               lt.addLast(obrasPorDepartamento,obra)          
+    print (obrasPorDepartamento)           
+    return obrasPorDepartamento        
+    
+
+def addPrecios(listaDepartamento):  
+    preciosObras=lt.newList("ARRAY_LIST")
+    for i in lt.iterator(listaDepartamento): 
+        dimension=i["Dimensions"]
+        if dimension != "":
+            dimensiones=[]
+            alturaObra=i["Height (cm)"] 
+            anchuraObra=i["Width (cm)"]    
+            profundidadObra=i["Depth (cm)"]  
+            if alturaObra != "" and alturaObra != "0": 
+                alturaObra=float(alturaObra)/100
+                dimensiones.append(alturaObra)
+            if anchuraObra != "" and anchuraObra != "0": 
+                anchuraObra=float(anchuraObra)/100
+                dimensiones.append(anchuraObra) 
+            if profundidadObra != "" and profundidadObra != "0": 
+                profundidadObra=float(profundidadObra)/100
+                dimensiones.append(profundidadObra) 
+            productoDimensiones=1   
+            for dimension in dimensiones:
+                productoDimensiones*=dimension        
+            preciosObra=[]   
+            preciosObra.append(productoDimensiones * 72.00)
+            peso=i["Weight (kg)"]   
+            if peso != "" and peso != "0": 
+               peso=float(peso)  
+               preciosObra.append(peso*72.00)
+            precioMayor=max(preciosObra)
+            i["CostoObra"]=precioMayor             
+            lt.addLast(preciosObras,i)  
+        else: 
+             i["CostoObra"]=48.00        
+             lt.addLast(preciosObras,i)      
+
+    return preciosObras   
+#Funciones de ordenamiento 
+def ordenarPorCosto(precios):
+    obrasConPrecio=lt.newList("ARRAY_LIST")  
+    for obra in lt.iterator(precios):
+         lt.addLast(obrasConPrecio,obra)
+    obrasConPrecioOrdenados=merge.sort(obrasConPrecio,cmpArtworkByCost)    
+    return obrasConPrecioOrdenados 
+
+def ordenarPorFecha(precios):     
+    obrasPorFecha=lt.newList("ARRAY_LIST")  
+    for obra in lt.iterator(precios):
+         lt.addLast(obrasPorFecha,obra)
+    obrasPorFechaOrdenadas=merge.sort(obrasPorFecha,cmpArtworkByDate)    
+    return obrasPorFechaOrdenadas 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
-def cmpDate(obra1,obra2): 
-    return ((str(obra1['Date']) < str(obra2['Date'])))
+def cmpArtworkByCost (artwork1,artwork2): 
+    """
+     Devuelve verdadero (True) si el 'CostoObra' de artwork1 es menor que el de artwork2
+     Args:
+     artwork1: informacion del primer artwork que incluye su valor 'CostoObra'
+     artwork2: informacion del segundo artwork que incluye su valor 'CostoObra'
+    """
+    return ((float(artwork1['CostoObra']) < float(artwork2['CostoObra'])))
 
-
+def cmpArtworkByDate(artwork1,artwork2): 
+    """
+     Devuelve verdadero (True) si el 'Date' de artwork1 es menor que el de artwork2
+     Args:
+     artwork1: informacion del primer artwork que incluye su valor 'Date'
+     artwork2: informacion del segundo artwork que incluye su valor 'Date'
+    """    
+    return ((str(artwork1['Date']) < str(artwork2['Date'])))
