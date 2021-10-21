@@ -286,6 +286,15 @@ def ordenarPorFecha(precios):
          lt.addLast(obrasPorFecha,obra)
     obrasPorFechaOrdenadas=merge.sort(obrasPorFecha,cmpArtworkByDate)    
     return obrasPorFechaOrdenadas 
+
+
+def ordenarArtNac (catalog):
+    sub_list1 = lt.subList(catalog, 1, lt.size(catalog))
+    sub_list1 = sub_list1.copy()
+    sort_list = merge.sort(sub_list1, cmpArtNum)
+    return sort_list
+
+
 # Funciones utilizadas para comparar elementos dentro de una lista
 
 def cmpArtworkByCost (artwork1,artwork2): 
@@ -305,3 +314,47 @@ def cmpArtworkByDate(artwork1,artwork2):
      artwork2: informacion del segundo artwork que incluye su valor 'Date'
     """    
     return ((str(artwork1['Date']) < str(artwork2['Date'])))
+
+def cmpArtNum(n1, n2):
+    num1 = n1["Artworks"]
+    num2 = n2["Artworks"]
+
+    if num1 > num2:
+        return True
+    else:
+        return False
+
+def searchCID (list_art, idAw):
+
+    size = lt.size(list_art)
+    x = 1
+
+    id_com = idAw.strip("[]")
+
+    while x < size:
+        element1 = lt.getElement(list_art, x)
+        co_id = element1["ConstituentID"]
+        if co_id in id_com:
+            return element1["DisplayName"]
+        x += 1
+
+def classArtworkByNa(catalog):
+
+    list1 = lt.newList(datastructure="ARRAY_LIST")
+    map1 = catalog['nationality']
+    
+    nas = mp.keySet(map1)
+
+    x = 1
+
+    while x < lt.size(nas):
+        na = lt.getElement(nas, x)
+        sec = mp.get(map1, na)
+        value1 = me.getValue(sec)
+        size1 = lt.size(value1)
+        catalog2 = {"Nacionalidad": na, "Artworks": size1}
+        lt.addLast(list1, catalog2)
+        x += 1
+
+    return list1
+

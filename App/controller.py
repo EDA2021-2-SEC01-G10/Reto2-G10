@@ -102,3 +102,8 @@ def ordenarPorFecha(precios):
     listOrdenada=model.ordenarPorFecha(precios)
     return listOrdenada 
     
+def numArt(catalog):
+    return model.classArtworkByNa(catalog)
+
+def searchCID (list_art, idAw):
+    return model.searchCID (list_art, idAw)

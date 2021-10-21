@@ -19,7 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
-import time 
+import time
+from DISClib.DataStructures.arraylist import getElement 
 import config as cf
 import sys
 import controller
@@ -73,6 +74,52 @@ def ordenarPorCosto(precios):
 def ordenarPorFecha(precios): 
     listOrdenada=controller.ordenarPorFecha(precios)
     return listOrdenada
+
+def req4 (list1, map1, list_art):
+        
+        print("El top 10 de las nacionalidades ordenadas por el total de obras de mayor a menor es: ")
+
+        x = 1
+        range = 11
+
+        while x < range:
+            element = lt.getElement(list1, x)
+            nac = str(element["Nacionalidad"])
+            if nac == "" or nac == None:
+                nac = "Unknown"
+            element = str(element["Artworks"]) 
+       
+            print("Nacionalidad: " + nac + "Artworks: " + element)
+
+            x += 1
+        
+        fc = lt.getElement(list1, 1)
+        co = fc["Nacionalidad"]
+        cou = mp.get(map1, co)
+        list2 = me.getValue(cou)
+        
+        print("La nacionalidad número 1 en MoMA es: " + str(co) + " con " + str(lt.size(list2)) + " piezas únicas: ")
+        print("Las primeras 3 y las últimas 3 obras en la lista de obras americanas son: ")
+
+        y = 1
+
+        while y < 4:
+            
+
+            first = lt.getElement(list2, y)
+            idAw = first["ConstituentID"]
+            name = controller.searchCID (list_art, idAw)
+            print("Título: " + first["Title"] + "; Nombre: " + str(name) + "; Fecha: " + first["Date"] + "; Medio: " + first["Medium"] + "; Dimenciones: " + first["Dimensions"] + "; Departamento: " + first["Department"] + "; Clasificación: " + first["Classification"] + "; URL: " + first["URL"])
+            y += 1
+        
+        z = 2
+
+        while z >= 0:
+            last = lt.getElement(list2, lt.size(list2) -1)
+            idAw = last["ConstituentID"]
+            name2 =  controller.searchCID (list_art, idAw)
+            print("Título: " + last["Title"] + "; Nombre: " + str(name2) + "; Fecha: " + last["Date"] + "; Medio: " + last["Medium"] + "; Dimenciones: " + last["Dimensions"] + "; Departamento: " + last["Department"] + "; Clasificación: " + last["Classification"] + "; URL: " + last["URL"])
+            z += 1
 
 
 catalog = None
@@ -185,6 +232,10 @@ while True:
          stop_time = time.process_time()
          timeT=(stop_time - start_time)*1000
          print("Tiempo:",timeT) 
+
+    elif int(inputs[0]) == 5:
+        start_time = time.process_time()
+        print( req4 )
 
     elif int(inputs[0]) == 6:     
          start_time = time.process_time()
