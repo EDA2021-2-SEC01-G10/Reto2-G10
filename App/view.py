@@ -74,52 +74,43 @@ def ordenarPorFecha(precios):
     listOrdenada=controller.ordenarPorFecha(precios)
     return listOrdenada
 
-def req4 (list1, map1, list_art):
-        
-        print("El top 10 de las nacionalidades ordenadas por el total de obras de mayor a menor es: ")
+def printArtworkData(artworks):
+    size = lt.size(artworks)
+    if size>0:
+        for artwork in lt.iterator(artworks):
+            if artwork is not None:
+                artistas = controller.getObrasArt(catalog, artwork["ConstituentID"])
+                print ("ID: " + artwork["ObjectID"] + ", Título: " + artwork["Title"] + ", Artista(s): " + artistas
+                    + "Fecha:  " + artwork["Date"] + ", Medio: " 
+                    + artwork["Medium"])
+    else:
+        print ("No se encontraron obras")
 
-        x = 1
-        range = 11
+def Req4(catalog):
 
-        while x < range:
-            element = lt.getElement(list1, x)
-            nac = str(element["Nacionalidad"])
-            if nac == "" or nac == None:
-                nac = "Unknown"
-            element = str(element["Artworks"]) 
-       
-            print("Nacionalidad: " + nac + "Artworks: " + element)
+    topNa = controller.firulais123(catalog)
+    first = lt.firstElement(topNa)
+    count = 0 
+    
+    print(("-" * 15) + "El Top de Nacionalidades con más obras en MoMA es: " + ("-" * 15) + "\n")
+    
+    for x in range(1, 11):
+        nac = lt.getElement(topNa, x)
+        count += 1
 
-            x += 1
-        
-        fc = lt.getElement(list1, 1)
-        co = fc["Nacionalidad"]
-        cou = mp.get(map1, co)
-        list2 = me.getValue(cou)
-        
-        print("La nacionalidad número 1 en MoMA es: " + str(co) + " con " + str(lt.size(list2)) + " piezas únicas: ")
-        print("Las primeras 3 y las últimas 3 obras en la lista de obras americanas son: ")
+        print(str(count) + ". " + str(nac["Nacionalidad"]) + ": " + str(lt.size(nac["artworks"]))+ "\n")
 
-        y = 1
-
-        while y < 4:
-            
-
-            first = lt.getElement(list2, y)
-            idAw = first["ConstituentID"]
-            name = controller.searchCID (list_art, idAw)
-            print("Título: " + first["Title"] + "; Nombre: " + str(name) + "; Fecha: " + first["Date"] + "; Medio: " + first["Medium"] + "; Dimenciones: " + first["Dimensions"] + "; Departamento: " + first["Department"] + "; Clasificación: " + first["Classification"] + "; URL: " + first["URL"])
-            y += 1
-        
-        z = 2
-
-        while z >= 0:
-            last = lt.getElement(list2, lt.size(list2) -1)
-            idAw = last["ConstituentID"]
-            name2 =  controller.searchCID (list_art, idAw)
-            print("Título: " + last["Title"] + "; Nombre: " + str(name2) + "; Fecha: " + last["Date"] + "; Medio: " + last["Medium"] + "; Dimenciones: " + last["Dimensions"] + "; Departamento: " + last["Department"] + "; Clasificación: " + last["Classification"] + "; URL: " + last["URL"])
-            z += 1
-
+    top1 = mp.get(catalog["Nacionalidad"], first["Nacionalidad"])
+    value = me.getValue(top1)
+    artworks = value["obras"]
+    first3 = controller.first3(artworks)
+    last3 = controller.last3(artworks)
+    print("-" * 84)
+    print(("-" * 21) + "Estos son las 3 primeras Obras encontradas" + ("-" * 21) + "\n")
+    printArtworkData(first3)
+    print("-" * 84)
+    print(("-" * 22) + "Estos son las 3 ultimas Obras encontradas" + ("-" * 21) + "\n")
+    printArtworkData(last3)
 
 catalog = None
 
@@ -194,6 +185,7 @@ while True:
         stop_time = time.process_time()
         timeT=(stop_time - start_time)*1000
         print("Tiempo:",timeT)     
+
     elif int(inputs[0]) == 4:
          start_time = time.process_time()
          nombreArtista=input("Ingrese el nombre del artista que desea consultar: ") 
@@ -234,7 +226,9 @@ while True:
 
     elif int(inputs[0]) == 5:
         start_time = time.process_time()
-        print( req4 )
+        Req4(catalog)
+        elapsed_time_mseg = (stop_time - start_time)*1000
+        print ("Tiempo transcurrido: " + str(elapsed_time_mseg))
 
     elif int(inputs[0]) == 6:     
          start_time = time.process_time()
