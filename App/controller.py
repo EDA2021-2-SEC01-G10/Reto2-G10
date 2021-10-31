@@ -89,6 +89,19 @@ def obtenerLista(catalog,departamento):
     listR=model.listaDepartamento(catalog,departamento)
     return listR
 
+def first3(lista):
+    return model.first3(lista)
+
+def last3(lista):
+    return model.last3(lista)
+
+def getObrasArt(catalog, ids):
+
+    return model.getObrasArt(catalog, ids)
+
+def firulais123(catalog):
+    return model.topNat(catalog)
+
 def preciosObras(listaDepartamento):
     listConPrecios=model.addPrecios(listaDepartamento)  
     return listConPrecios
@@ -102,8 +115,7 @@ def ordenarPorFecha(precios):
     listOrdenada=model.ordenarPorFecha(precios)
     return listOrdenada 
     
-def numArt(catalog):
-    return model.classArtworkByNa(catalog)
+
 
 def searchCID (list_art, idAw):
     return model.searchCID (list_art, idAw)

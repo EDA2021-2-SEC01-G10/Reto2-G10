@@ -206,7 +206,21 @@ def listarAdquisisiones(catalog,fechaInicial,fechaFinal):
            elif fechaCom > fechaFinDate:
                 break 
     return listR      
-              
+
+def getObrasArt(catalog, ids):
+
+    artists = ""
+    ids1 = ids.replace("[", "").replace("]", "").split(",")
+    for x in ids1:
+        x = x.strip()
+        NaRepetida = mp.contains(catalog["ConstituentID-Artists"], x)
+        if NaRepetida:
+            pareja = mp.get(catalog["ConstituentID-Artists"], x)
+            value = me.getValue(pareja)
+            name = value["Nombre"]
+        artists += name + " "
+    return artists
+
 def obrasArtista(catalog,nombreArtista): 
     obras=lt.newList('SINGLE_LINKED')
     artistas=catalog["artists"]
@@ -338,23 +352,28 @@ def searchCID (list_art, idAw):
             return element1["DisplayName"]
         x += 1
 
-def classArtworkByNa(catalog):
+def first3(list):
+    first = lt.subList(list,1,3)
+    return first
 
-    list1 = lt.newList(datastructure="ARRAY_LIST")
-    map1 = catalog['nationality']
-    
-    nas = mp.keySet(map1)
+def last3(lista):
+    last = lt.subList(lista,lt.size(lista)-2,3)
+    return last
 
-    x = 1
 
-    while x < lt.size(nas):
-        na = lt.getElement(nas, x)
-        sec = mp.get(map1, na)
-        value1 = me.getValue(sec)
-        size1 = lt.size(value1)
-        catalog2 = {"Nacionalidad": na, "Artworks": size1}
-        lt.addLast(list1, catalog2)
-        x += 1
+def compSize(n1, n2):
+    return (lt.size(n1["artworks"]) > lt.size(n2["artworks"]))
 
-    return list1
+def topNat(catalog):
+
+    keys = mp.keySet(catalog["Nacionalidad"])
+    topNa = lt.newList()
+    for x in lt.iterator(keys):
+        entry = mp.get(catalog["Nacionalidad"], x)
+        nac = me.getValue(entry)
+        lt.addLast(topNa, nac)
+    merge.sort(topNa, cmpfunction = compSize)
+
+    return topNa
+
 
